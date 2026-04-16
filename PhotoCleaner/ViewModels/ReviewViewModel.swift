@@ -23,6 +23,8 @@ final class ReviewViewModel: ObservableObject {
     private var lastAction: ReviewAction?
     private var loadTask: Task<Void, Never>?
     private var imageTask: Task<Void, Never>?
+    private var preloadTask: Task<Void, Never>?
+    private var preloadedImages: [String: NSImage] = [:]
     private let displayTargetSize = CGSize(width: 2200, height: 1600)
 
     init(photosService: PhotosService) {
@@ -174,6 +176,7 @@ final class ReviewViewModel: ObservableObject {
             assets = fetchedAssets
             currentIndex = 0
             lastAction = nil
+            preloadedImages.removeAll()
             isLoadingLibrary = false
 
             loadCurrentImage()
@@ -239,7 +242,14 @@ final class ReviewViewModel: ObservableObject {
 
         if currentIndex < assets.count - 1 {
             currentIndex += 1
-            loadCurrentImage()
+            if let asset = currentAsset, let preloadedImage = preloadedImages.removeValue(forKey: asset.localIdentifier) {
+                // Use any preloaded frame immediately to reduce perceived latency.
+                currentImage = preloadedImage
+                isLoadingImage = false
+                startPreloadingUpcomingAssets()
+            } else {
+                loadCurrentImage()
+            }
         } else {
             currentImage = nil
         }
@@ -268,6 +278,7 @@ final class ReviewViewModel: ObservableObject {
                 if currentAsset?.localIdentifier == asset.localIdentifier {
                     currentImage = image
                     isLoadingImage = false
+                    startPreloadingUpcomingAssets()
                 }
             } catch is CancellationError {
                 return
@@ -275,6 +286,39 @@ final class ReviewViewModel: ObservableObject {
                 guard Task.isCancelled == false else { return }
                 isLoadingImage = false
                 handleFailedImageLoad(for: asset, error: error)
+            }
+        }
+    }
+
+    private func startPreloadingUpcomingAssets() {
+        preloadTask?.cancel()
+
+        let start = currentIndex + 1
+        let end = min(assets.count - 1, currentIndex + 3)
+        guard start <= end else { return }
+
+        let upcomingAssets = Array(assets[start...end])
+
+        preloadTask = Task { [weak self] in
+            guard let self else { return }
+
+            for asset in upcomingAssets {
+                if Task.isCancelled {
+                    return
+                }
+
+                if preloadedImages[asset.localIdentifier] != nil {
+                    continue
+                }
+
+                do {
+                    let image = try await photosService.requestImage(for: asset, targetSize: displayTargetSize)
+                    guard Task.isCancelled == false else { return }
+                    preloadedImages[asset.localIdentifier] = image
+                } catch {
+                    // Fail quietly; standard image loading path still handles this asset.
+                    continue
+                }
             }
         }
     }
