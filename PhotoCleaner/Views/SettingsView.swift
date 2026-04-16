@@ -12,7 +12,7 @@ struct SettingsView: View {
             }
             .pickerStyle(.radioGroup)
 
-            Text("Instant delete still uses the real Photos deletion flow and moves items to Recently Deleted.")
+            Text("Delete actions are queued while reviewing. Use Commit Deletes to send the queued batch to Photos in one change request.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

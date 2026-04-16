@@ -56,12 +56,12 @@ final class PhotosService {
         }
     }
 
-    func fetchAssets(filter: ReviewFilter) async -> [PHAsset] {
+    func fetchAssets(filter: ReviewFilter, sortOrder: ReviewSortOrder) async -> [PHAsset] {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 let options = PHFetchOptions()
                 options.includeHiddenAssets = false
-                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+                options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: sortOrder.ascendingCreationDate)]
                 options.predicate = self.predicate(for: filter)
 
                 // v1 intentionally reviews still images only. Videos are excluded so we do not
@@ -135,11 +135,17 @@ final class PhotosService {
     }
 
     func delete(asset: PHAsset) async throws {
+        try await delete(assets: [asset])
+    }
+
+    func delete(assets: [PHAsset]) async throws {
+        guard assets.isEmpty == false else { return }
+
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             // This is the real PhotoKit deletion flow. Successful deletion moves the asset
             // into Photos' Recently Deleted album rather than just removing it from our UI.
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+                PHAssetChangeRequest.deleteAssets(assets as NSArray)
             }, completionHandler: { success, error in
                 if let error {
                     continuation.resume(throwing: error)

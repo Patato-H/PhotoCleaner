@@ -5,13 +5,18 @@ struct ToolbarView: View {
     @EnvironmentObject private var viewModel: ReviewViewModel
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("PhotoCleaner")
-                    .font(.headline)
+                    .font(.title3.weight(.semibold))
                 Text(viewModel.progressText)
-                    .font(.caption)
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
+                if viewModel.pendingDeleteCount > 0 {
+                    Text("Queued deletes: \(viewModel.pendingDeleteCount)")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
             }
 
             Picker("Filter", selection: Binding(
@@ -23,7 +28,20 @@ struct ToolbarView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
             .frame(maxWidth: 300)
+
+            Picker("Order", selection: Binding(
+                get: { viewModel.sortOrder },
+                set: { viewModel.updateSortOrder($0) }
+            )) {
+                ForEach(ReviewSortOrder.allCases) { sortOrder in
+                    Text(sortOrder.rawValue).tag(sortOrder)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(maxWidth: 260)
 
             Spacer()
 
@@ -42,9 +60,16 @@ struct ToolbarView: View {
             } label: {
                 Label("Settings", systemImage: "gearshape")
             }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.06), radius: 12, y: 6)
     }
 }

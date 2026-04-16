@@ -24,6 +24,12 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("z", modifiers: [.command])
             .disabled(viewModel.canUndo == false)
+
+            Button("Commit Queued Deletes") {
+                viewModel.requestCommitPendingDeletes()
+            }
+            .keyboardShortcut(.return, modifiers: [.command])
+            .disabled(viewModel.hasPendingDeletes == false || viewModel.isBusy)
         }
     }
 }

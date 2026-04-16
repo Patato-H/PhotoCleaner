@@ -15,9 +15,12 @@ final class ReviewViewModel: ObservableObject {
     @Published private(set) var isDeleting = false
     @Published private(set) var errorMessage: String?
     @Published var showErrorAlert = false
+    @Published private(set) var pendingDeleteAssets: [PHAsset] = []
     @Published var filter: ReviewFilter = .all
+    @Published var sortOrder: ReviewSortOrder = .newestFirst
     @Published var deleteBehavior: DeleteBehavior = .instant
     @Published var shouldShowDeleteConfirmation = false
+    @Published var shouldShowCommitConfirmation = false
 
     private let photosService: PhotosService
     private var lastAction: ReviewAction?
@@ -60,6 +63,14 @@ final class ReviewViewModel: ObservableObject {
 
     var canUndo: Bool {
         lastAction != nil
+    }
+
+    var pendingDeleteCount: Int {
+        pendingDeleteAssets.count
+    }
+
+    var hasPendingDeletes: Bool {
+        pendingDeleteAssets.isEmpty == false
     }
 
     var isCurrentAssetScreenshot: Bool {
@@ -113,24 +124,39 @@ final class ReviewViewModel: ObservableObject {
         reloadAssets()
     }
 
+    func updateSortOrder(_ newSortOrder: ReviewSortOrder) {
+        guard sortOrder != newSortOrder else { return }
+        sortOrder = newSortOrder
+        reloadAssets()
+    }
+
     func requestDeleteCurrent() {
         guard currentAsset != nil, isBusy == false else { return }
 
         if deleteBehavior == .confirm {
             shouldShowDeleteConfirmation = true
         } else {
-            Task {
-                await deleteCurrent()
-            }
+            queueCurrentForDelete()
         }
     }
 
     func confirmDeleteCurrent() {
         guard currentAsset != nil else { return }
         shouldShowDeleteConfirmation = false
+        queueCurrentForDelete()
+    }
+
+    func requestCommitPendingDeletes() {
+        guard hasPendingDeletes, isBusy == false else { return }
+        shouldShowCommitConfirmation = true
+    }
+
+    func confirmCommitPendingDeletes() {
+        guard hasPendingDeletes else { return }
+        shouldShowCommitConfirmation = false
 
         Task {
-            await deleteCurrent()
+            await commitPendingDeletes()
         }
     }
 
@@ -141,20 +167,56 @@ final class ReviewViewModel: ObservableObject {
         advanceToNextAsset()
     }
 
-    func undoLastAction() {
-        guard let lastAction else { return }
+    func showPreviousPhoto() {
+        guard hasAssets, isBusy == false else { return }
+        guard currentIndex > 0 else { return }
 
-        switch lastAction {
+        currentIndex -= 1
+        if let asset = currentAsset, let preloadedImage = preloadedImages.removeValue(forKey: asset.localIdentifier) {
+            currentImage = preloadedImage
+            isLoadingImage = false
+            startPreloadingUpcomingAssets()
+        } else {
+            loadCurrentImage()
+        }
+    }
+
+    func showNextPhoto() {
+        guard hasAssets, isBusy == false else { return }
+        guard currentIndex < assets.count - 1 else { return }
+
+        currentIndex += 1
+        if let asset = currentAsset, let preloadedImage = preloadedImages.removeValue(forKey: asset.localIdentifier) {
+            currentImage = preloadedImage
+            isLoadingImage = false
+            startPreloadingUpcomingAssets()
+        } else {
+            loadCurrentImage()
+        }
+    }
+
+    func undoLastAction() {
+        guard let previousAction = lastAction else { return }
+
+        switch previousAction {
         case .keep(let previousIndex):
             guard assets.isEmpty == false else { return }
             currentIndex = min(previousIndex, assets.count - 1)
             loadCurrentImage()
-        case .delete:
-            // True delete undo is not possible here. After a successful PhotoKit delete the asset
-            // is moved into Photos' Recently Deleted area, and PhotoKit does not provide a public
-            // API to restore it back into the main library programmatically.
-            presentError("Cannot undo a delete in-app. Restore it from Recently Deleted in Photos if needed.")
+        case .queuedDelete(let asset, let originalIndex):
+            guard let pendingIndex = pendingDeleteAssets.lastIndex(where: { $0.localIdentifier == asset.localIdentifier }) else {
+                return
+            }
+
+            pendingDeleteAssets.remove(at: pendingIndex)
+
+            let insertIndex = min(max(0, originalIndex), assets.count)
+            assets.insert(asset, at: insertIndex)
+            currentIndex = insertIndex
+            loadCurrentImage()
         }
+
+        lastAction = nil
     }
 
     func reloadAssets() {
@@ -170,12 +232,13 @@ final class ReviewViewModel: ObservableObject {
             currentImage = nil
             photosService.stopCachingAllImages()
 
-            let fetchedAssets = await photosService.fetchAssets(filter: filter)
+            let fetchedAssets = await photosService.fetchAssets(filter: filter, sortOrder: sortOrder)
             guard Task.isCancelled == false else { return }
 
             assets = fetchedAssets
             currentIndex = 0
             lastAction = nil
+            pendingDeleteAssets.removeAll()
             preloadedImages.removeAll()
             isLoadingLibrary = false
 
@@ -202,32 +265,46 @@ final class ReviewViewModel: ObservableObject {
         loadCurrentImage()
     }
 
-    private func deleteCurrent() async {
+    private func queueCurrentForDelete() {
         guard let asset = currentAsset else { return }
 
+        guard let deleteIndex = assets.firstIndex(where: { $0.localIdentifier == asset.localIdentifier }) else {
+            return
+        }
+
+        assets.remove(at: deleteIndex)
+        pendingDeleteAssets.append(asset)
+        lastAction = .queuedDelete(asset: asset, originalIndex: deleteIndex)
+        preloadedImages[asset.localIdentifier] = nil
+
+        if assets.isEmpty {
+            currentIndex = 0
+            currentImage = nil
+            isLoadingImage = false
+            return
+        }
+
+        currentIndex = min(deleteIndex, assets.count - 1)
+        if let visibleAsset = currentAsset, let preloadedImage = preloadedImages.removeValue(forKey: visibleAsset.localIdentifier) {
+            currentImage = preloadedImage
+            isLoadingImage = false
+            startPreloadingUpcomingAssets()
+        } else {
+            loadCurrentImage()
+        }
+    }
+
+    private func commitPendingDeletes() async {
+        guard pendingDeleteAssets.isEmpty == false else { return }
+
         isDeleting = true
+        let toDelete = pendingDeleteAssets
 
         do {
-            try await photosService.delete(asset: asset)
-
-            guard let deleteIndex = assets.firstIndex(where: { $0.localIdentifier == asset.localIdentifier }) else {
-                isDeleting = false
-                return
-            }
-
-            assets.remove(at: deleteIndex)
-            lastAction = .delete
-
-            if assets.isEmpty {
-                currentIndex = 0
-                currentImage = nil
-                isDeleting = false
-                return
-            }
-
-            currentIndex = min(deleteIndex, assets.count - 1)
+            try await photosService.delete(assets: toDelete)
+            pendingDeleteAssets.removeAll()
+            lastAction = nil
             isDeleting = false
-            loadCurrentImage()
         } catch {
             isDeleting = false
             presentError(error.localizedDescription)

@@ -10,8 +10,12 @@ struct PhotoCardView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.black.opacity(0.9))
-                .shadow(color: Color.black.opacity(0.4), radius: 20, x: 0, y: 16)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.16), radius: 24, x: 0, y: 16)
 
             if let image {
                 GeometryReader { proxy in
@@ -39,6 +43,7 @@ struct PhotoCardView: View {
                 }
             }
         }
+        .padding(6)
         .overlay(alignment: .bottomLeading) {
             if let asset {
                 MetadataOverlayView(asset: asset)
@@ -64,8 +69,10 @@ private struct MetadataOverlayView: View {
             }
         }
         .font(.caption)
-        .padding(8)
-        .background(.thinMaterial)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(.regularMaterial)
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1), lineWidth: 1))
         .clipShape(Capsule())
         .padding(16)
     }
