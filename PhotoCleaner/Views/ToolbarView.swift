@@ -45,6 +45,13 @@ struct ToolbarView: View {
 
             Spacer()
 
+            Button {
+                viewModel.shouldShowJumpBrowser = true
+            } label: {
+                Label("Browse", systemImage: "square.grid.2x2")
+            }
+            .buttonStyle(.bordered)
+
             Menu {
                 Picker("Delete behavior", selection: $viewModel.deleteBehavior) {
                     ForEach(DeleteBehavior.allCases) { behavior in

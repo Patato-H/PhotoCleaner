@@ -1,7 +1,7 @@
 import SwiftUI
-import Photos
+import UIKit
 
-struct ReviewView: View {
+struct IOSReviewView: View {
     @EnvironmentObject private var viewModel: ReviewViewModel
     @State private var dragOffset: CGSize = .zero
     @State private var cardOpacity: Double = 1.0
@@ -16,36 +16,33 @@ struct ReviewView: View {
     }
 
     var body: some View {
-        KeyCaptureView(onKeyDown: handleKeyEvent) {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(nsColor: .controlBackgroundColor),
-                        Color(nsColor: .windowBackgroundColor),
-                        Color.black.opacity(0.12)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(uiColor: .secondarySystemGroupedBackground),
+                    Color(uiColor: .systemGroupedBackground),
+                    Color.black.opacity(0.06)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
-                VStack(spacing: 16) {
-                    ToolbarView()
-                        .padding(.horizontal, 24)
-                        .padding(.top, 18)
+            VStack(spacing: 12) {
+                IOSToolbarView()
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
 
-                    Spacer()
+                Spacer(minLength: 0)
 
-                    mainContent
-                        .frame(maxWidth: 980, maxHeight: 640)
-                        .padding(.horizontal, 40)
+                mainContent
+                    .padding(.horizontal, 16)
 
-                    Spacer()
+                Spacer(minLength: 0)
 
-                    bottomBar
-                        .padding(.bottom, 20)
-                        .padding(.horizontal, 40)
-                }
+                bottomBar
+                    .padding(.bottom, 12)
+                    .padding(.horizontal, 16)
             }
         }
         .onAppear {
@@ -221,9 +218,8 @@ struct ReviewView: View {
                 } label: {
                     Label("Delete", systemImage: "trash")
                         .font(.headline.weight(.semibold))
-                        .frame(width: 132)
+                        .frame(maxWidth: .infinity)
                 }
-                .keyboardShortcut(.leftArrow, modifiers: [])
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
                 .disabled(viewModel.hasAssets == false || viewModel.isBusy)
@@ -233,21 +229,19 @@ struct ReviewView: View {
                 } label: {
                     Label("Keep", systemImage: "checkmark.circle")
                         .font(.headline.weight(.semibold))
-                        .frame(width: 132)
+                        .frame(maxWidth: .infinity)
                 }
-                .keyboardShortcut(.rightArrow, modifiers: [])
                 .buttonStyle(.borderedProminent)
                 .tint(.blue)
                 .disabled(viewModel.hasAssets == false || viewModel.isBusy)
+            }
 
-                Spacer()
-
+            HStack(spacing: 12) {
                 Button {
                     viewModel.undoLastAction()
                 } label: {
                     Label("Undo", systemImage: "arrow.uturn.backward")
                 }
-                .keyboardShortcut("z", modifiers: [.command])
                 .disabled(viewModel.canUndo == false)
 
                 Button {
@@ -255,23 +249,19 @@ struct ReviewView: View {
                 } label: {
                     Label("Commit \(viewModel.pendingDeleteCount)", systemImage: "checkmark.circle.badge.xmark")
                 }
-                .keyboardShortcut(.return, modifiers: [.command])
                 .buttonStyle(.borderedProminent)
                 .tint(.orange)
                 .disabled(viewModel.hasPendingDeletes == false || viewModel.isBusy)
             }
+            .font(.subheadline.weight(.medium))
 
-            HStack(spacing: 8) {
-                keyHint(text: "←/A", description: "Delete")
-                keyHint(text: "→/D", description: "Keep")
-                keyHint(text: "↑↓", description: "Navigate")
-                keyHint(text: "⌘Z", description: "Undo")
-                keyHint(text: "⌘↩", description: "Commit")
-                Spacer()
-            }
-            .font(.caption2)
+            Text("Swipe right to keep, left to delete — or use the buttons.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(
@@ -279,50 +269,5 @@ struct ReviewView: View {
                 .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.08), radius: 16, y: 8)
-    }
-
-    private func keyHint(text: String, description: String) -> some View {
-        HStack(spacing: 4) {
-            Text(text)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color.primary.opacity(0.08))
-                        .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.primary.opacity(0.15)))
-                )
-            Text(description)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    private func handleKeyEvent(_ event: NSEvent) {
-        guard event.type == .keyDown else { return }
-        guard viewModel.isBusy == false, isSwipeAnimating == false else { return }
-
-        switch event.keyCode {
-        case 0: // A
-            if viewModel.deleteBehavior == .confirm {
-                viewModel.requestDeleteCurrent()
-            } else {
-                animateSwipeAndPerform(.left)
-            }
-        case 2: // D
-            animateSwipeAndPerform(.right)
-        case 126: // up arrow
-            viewModel.showPreviousPhoto()
-        case 125: // down arrow
-            viewModel.showNextPhoto()
-        case 123: // left arrow
-            if viewModel.deleteBehavior == .confirm {
-                viewModel.requestDeleteCurrent()
-            } else {
-                animateSwipeAndPerform(.left)
-            }
-        case 124: // right arrow
-            animateSwipeAndPerform(.right)
-        default:
-            break
-        }
     }
 }

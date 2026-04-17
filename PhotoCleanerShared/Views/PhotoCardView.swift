@@ -1,9 +1,8 @@
-import SwiftUI
 import Photos
-import AppKit
+import SwiftUI
 
 struct PhotoCardView: View {
-    let image: NSImage?
+    let image: PlatformImage?
     let asset: PHAsset?
     let isLoading: Bool
 
@@ -20,11 +19,18 @@ struct PhotoCardView: View {
             if let image {
                 GeometryReader { proxy in
                     let size = proxy.size
-                    Image(nsImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: size.width, height: size.height)
-                        .clipped()
+                    Group {
+                        #if os(macOS)
+                        Image(nsImage: image)
+                            .resizable()
+                        #else
+                        Image(uiImage: image)
+                            .resizable()
+                        #endif
+                    }
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
                 }
                 .padding(16)
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -51,6 +57,7 @@ struct PhotoCardView: View {
         }
     }
 }
+
 private struct MetadataOverlayView: View {
     let asset: PHAsset
 
@@ -77,4 +84,3 @@ private struct MetadataOverlayView: View {
         .padding(16)
     }
 }
-

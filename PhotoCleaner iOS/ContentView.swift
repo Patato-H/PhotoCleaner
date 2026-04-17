@@ -9,12 +9,11 @@ struct ContentView: View {
             case .notDetermined:
                 PermissionView()
             case .authorized, .limited:
-                ReviewView()
+                IOSReviewView()
             case .denied:
                 PermissionDeniedView()
             }
         }
-        .frame(minWidth: 900, minHeight: 650)
         .onAppear {
             viewModel.onAppear()
         }

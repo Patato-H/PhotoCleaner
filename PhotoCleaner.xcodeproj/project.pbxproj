@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		993149BB2F91747700094BB8 /* PhotoCleaner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoCleaner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		99314A4B2F91BA1000094BB8 /* PhotoCleaner iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PhotoCleaner iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +17,27 @@
 			path = PhotoCleaner;
 			sourceTree = "<group>";
 		};
+		99314A4C2F91BA1000094BB8 /* PhotoCleaner iOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "PhotoCleaner iOS";
+			sourceTree = "<group>";
+		};
+		A9314B702F91BA3000094BB8 /* PhotoCleanerShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PhotoCleanerShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		993149B82F91747600094BB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		99314A482F91BA1000094BB8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +51,8 @@
 			isa = PBXGroup;
 			children = (
 				993149BD2F91747700094BB8 /* PhotoCleaner */,
+				99314A4C2F91BA1000094BB8 /* PhotoCleaner iOS */,
+				A9314B702F91BA3000094BB8 /* PhotoCleanerShared */,
 				993149BC2F91747700094BB8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				993149BB2F91747700094BB8 /* PhotoCleaner.app */,
+				99314A4B2F91BA1000094BB8 /* PhotoCleaner iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,12 +83,36 @@
 			);
 			fileSystemSynchronizedGroups = (
 				993149BD2F91747700094BB8 /* PhotoCleaner */,
+				A9314B702F91BA3000094BB8 /* PhotoCleanerShared */,
 			);
 			name = PhotoCleaner;
 			packageProductDependencies = (
 			);
 			productName = PhotoCleaner;
 			productReference = 993149BB2F91747700094BB8 /* PhotoCleaner.app */;
+			productType = "com.apple.product-type.application";
+		};
+		99314A4A2F91BA1000094BB8 /* PhotoCleaner iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99314A532F91BA1200094BB8 /* Build configuration list for PBXNativeTarget "PhotoCleaner iOS" */;
+			buildPhases = (
+				99314A472F91BA1000094BB8 /* Sources */,
+				99314A482F91BA1000094BB8 /* Frameworks */,
+				99314A492F91BA1000094BB8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				99314A4C2F91BA1000094BB8 /* PhotoCleaner iOS */,
+				A9314B702F91BA3000094BB8 /* PhotoCleanerShared */,
+			);
+			name = "PhotoCleaner iOS";
+			packageProductDependencies = (
+			);
+			productName = "PhotoCleaner iOS";
+			productReference = 99314A4B2F91BA1000094BB8 /* PhotoCleaner iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -81,6 +126,9 @@
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					993149BA2F91747600094BB8 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					99314A4A2F91BA1000094BB8 = {
 						CreatedOnToolsVersion = 26.3;
 					};
 				};
@@ -100,6 +148,7 @@
 			projectRoot = "";
 			targets = (
 				993149BA2F91747600094BB8 /* PhotoCleaner */,
+				99314A4A2F91BA1000094BB8 /* PhotoCleaner iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -112,10 +161,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		99314A492F91BA1000094BB8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		993149B72F91747600094BB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		99314A472F91BA1000094BB8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -305,6 +368,79 @@
 			};
 			name = Release;
 		};
+		99314A542F91BA1200094BB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25393T2245;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PhotoCleaner needs write access so it can move photos you delete into Recently Deleted.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "PhotoCleaner needs access to your Photos library so you can review and clean up your collection.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.danielharapiak.PhotoCleaner-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		99314A552F91BA1200094BB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 25393T2245;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PhotoCleaner needs write access so it can move photos you delete into Recently Deleted.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "PhotoCleaner needs access to your Photos library so you can review and clean up your collection.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.danielharapiak.PhotoCleaner-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -322,6 +458,15 @@
 			buildConfigurations = (
 				993149C72F91747700094BB8 /* Debug */,
 				993149C82F91747700094BB8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		99314A532F91BA1200094BB8 /* Build configuration list for PBXNativeTarget "PhotoCleaner iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				99314A542F91BA1200094BB8 /* Debug */,
+				99314A552F91BA1200094BB8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
